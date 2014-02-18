@@ -10,7 +10,9 @@ import java.util.Scanner;
 import java.util.Vector;
 
 /**
- * @author Hao Eng Assumption: the file will be saved after every operation.
+ * @author Hao Eng
+ * @version CE2
+ * @see Assumption: the file will be saved after every operation.
  */
 
 public class TextBuddy {
