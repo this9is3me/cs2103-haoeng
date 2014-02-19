@@ -17,14 +17,14 @@ import java.util.Vector;
 
 public class TextBuddy {
 	// for numbering in the list.
-	public static int count = 0;
-	public static String WELCOME_MSG = "Welcome to TextBuddy. %s is ready for use.\n",
+	private static int count = 0;
+	private static String WELCOME_MSG = "Welcome to TextBuddy. %s is ready for use.\n",
 			COMMAND = "command: ",
 			ADD = "add",
 			DISPLAY = "display",
 			CLEAR = "clear", DELETE = "delete", EXIT = "exit";
-	public static Vector<String> list = new Vector<String>();
-	public static Scanner sc = new Scanner(System.in);
+	private static Vector<String> list = new Vector<String>();
+	private static Scanner sc = new Scanner(System.in);
 
 	/**
 	 * @param args
@@ -39,6 +39,86 @@ public class TextBuddy {
 
 	/**
 	 * @param filename
+	 * @param command
+	 * @throws FileNotFoundException
+	 */
+	private static void checkWordAssignAction(String filename, String command)
+			throws FileNotFoundException {
+
+		if (command.startsWith(ADD)) {
+			String text = replacingAdd(command);
+			list.add(text);
+			writeTextToFile(text, list.size(), filename);
+			printSuccessfulAddMsg(filename, text);
+		}
+
+		if (command.startsWith(DISPLAY)) {
+			printContentsOfFile(filename);
+		}
+
+		if (command.startsWith(CLEAR)) {
+			clearFile(filename);
+			list.clear();
+			printSuccessfulDeleteMsg(filename);
+		}
+
+		if (command.startsWith(DELETE)) {
+			String lineNum = replacingDelete(command);
+			int position = convertStringToInteger(lineNum);
+			removeSelectedLine(position, list, filename);
+		}
+
+		if (!command.startsWith(EXIT)) {
+			printCommandLine();
+		}
+
+		if (command.startsWith(EXIT)) {
+			closeFile();
+		}
+	}
+
+	/**
+	 * 
+	 * @param lineNum
+	 * @return
+	 * @throws NumberFormatException
+	 */
+	private static int convertStringToInteger(String lineNum)
+			throws NumberFormatException {
+		int position = -1;
+		try {
+			position = Integer.parseInt(lineNum);
+
+		} catch (NumberFormatException e) {
+			System.out.println("'Delete' takes a number argument.");
+		}
+		return position;
+	}
+
+	/**
+	 * 
+	 * @param filename
+	 * @throws FileNotFoundException
+	 */
+	public static void clearFile(String filename) throws FileNotFoundException {
+		try {
+			File file = new File(filename);
+			FileWriter fw = new FileWriter(file);
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write("");
+			bw.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void closeFile() {
+		sc.close();
+	}
+
+	/**
+	 * @param filename
 	 * @throws FileNotFoundException
 	 */
 	private static void commandHandler(String filename)
@@ -48,131 +128,7 @@ public class TextBuddy {
 			command = readCommand();
 			checkWordAssignAction(filename, command);
 
-		} while (!keyword(command, EXIT)); // not an exit command
-	}
-
-	/**
-	 * @param filename
-	 * @param command
-	 * @throws FileNotFoundException
-	 */
-	private static void checkWordAssignAction(String filename, String command)
-			throws FileNotFoundException {
-		// checking the action for the command
-		if (keyword(command, ADD)) {
-			String text = replacingAdd(command);
-			list.add(text);
-			writeTextToFile(text, list.size(), filename);
-			printSuccessfulAddMsg(filename, text);
-		}
-
-		if (keyword(command, DISPLAY)) {
-			printContentsOfFile(filename);
-		}
-
-		if (keyword(command, CLEAR)) {
-			clearFile(filename);
-			list.clear();
-			printSuccessfulDeleteMsg(filename);
-		}
-
-		if (keyword(command, DELETE)) {
-			String lineNum = replacingDelete(command);
-			removeSelectedLine(lineNum, list, filename);
-		}
-
-		if (!keyword(command, EXIT)) {
-			printCommandLine();
-		}
-
-		if (keyword(command, EXIT)) {
-			closeFile();
-		}
-	}
-
-	/**
-	 * 
-	 * @param command
-	 * @param word
-	 * @return
-	 */
-	private static boolean keyword(String command, String word) {
-		if (command.startsWith(word)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * @return
-	 */
-	private static String readCommand() {
-		String command;
-		command = sc.nextLine();
-		return command;
-	}
-
-	/**
-	 * @param command
-	 * @return
-	 */
-	private static String replacingDelete(String command) {
-		String text = command.replace("delete ", "");
-		return text;
-	}
-
-	private static void closeFile() {
-		sc.close();
-	}
-
-	private static void printCommandLine() {
-		System.out.print("command: ");
-	}
-
-	/**
-	 * @param filename
-	 */
-	private static void printSuccessfulDeleteMsg(String filename) {
-		System.out.println("all content deleted from " + filename);
-	}
-
-	/**
-	 * @param filename
-	 * @param text
-	 */
-	private static void printSuccessfulAddMsg(String filename, String text) {
-		System.out.println("added to " + filename + ": " + "\"" + text + "\"");
-	}
-
-	/**
-	 * @param command
-	 * @return
-	 */
-	private static String replacingAdd(String command) {
-		String text = command.replace("add ", "");
-		return text;
-	}
-
-	/**
-	 * @param args
-	 * @return
-	 */
-	private static String retrieveFileName(String[] args) {
-		String filename = null;
-		// taking in the filename
-		if (args.length > 0) {
-			filename = args[0];
-		}
-		return filename;
-	}
-
-	/**
-	 * @param filename
-	 */
-	private static void printMsg(String filename) {
-		System.out.printf(WELCOME_MSG, filename);
-		System.out.print(COMMAND);
+		} while (!command.startsWith(EXIT)); // not an exit command
 	}
 
 	/**
@@ -197,12 +153,27 @@ public class TextBuddy {
 				// remove the number in front of the sentence
 				line = line.replaceAll("[0-9]+. ", "");
 				list.add(line);
-				count++;
+				setCount(getCount() + 1);
 			}
 			bufferedReader.close();
 		}
 	}
 
+	/**
+	 * @return the count
+	 */
+	public static int getCount() {
+		return count;
+	}
+
+	private static void printCommandLine() {
+		System.out.print("command: ");
+	}
+
+	/**
+	 * 
+	 * @param file
+	 */
 	public static void printContentsOfFile(String file) {
 
 		// This will reference one line at a time
@@ -229,21 +200,124 @@ public class TextBuddy {
 		}
 	}
 
-	public static void clearFile(String filename) throws FileNotFoundException {
-		try {
-			File file = new File(filename);
-			FileWriter fw = new FileWriter(file);
-			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write("");
-			bw.close();
+	/**
+	 * @param filename
+	 */
+	private static void printMsg(String filename) {
+		System.out.printf(WELCOME_MSG, filename);
+		System.out.print(COMMAND);
+	}
 
+	/**
+	 * @param filename
+	 * @param text
+	 */
+	private static void printSuccessfulAddMsg(String filename, String text) {
+		System.out.println("added to " + filename + ": " + "\"" + text + "\"");
+	}
+
+	/**
+	 * @param filename
+	 */
+	private static void printSuccessfulDeleteMsg(String filename) {
+		System.out.println("all content deleted from " + filename);
+	}
+
+	/**
+	 * @return
+	 */
+	private static String readCommand() {
+		String command;
+		command = sc.nextLine();
+		return command;
+	}
+
+	/**
+	 * 
+	 * @param lineNum
+	 * @param list
+	 * @param filename
+	 * @throws FileNotFoundException
+	 */
+	private static void removeSelectedLine(int position, Vector<String> list,
+			String filename) throws FileNotFoundException {
+
+		// if the number to delete is out of the list
+		if ((position > list.size()) || (position <= 0)) {
+			System.out.println("Invalid deletion");
+			return;
 		}
 
-		catch (IOException e) {
-			e.printStackTrace();
+		System.out.println("deleted from " + filename + ": \""
+				+ list.get(position - 1) + "\"");
+
+		rewriteFile(position, list, filename);
+	}
+
+	/**
+	 * @param position
+	 * @param list
+	 * @param filename
+	 * @throws FileNotFoundException
+	 */
+	private static void rewriteFile(int position, Vector<String> list,
+			String filename) throws FileNotFoundException {
+
+		list.removeElementAt(position - 1);
+		clearFile(filename);
+		Iterator<String> itr = list.iterator();
+		int count = 0;
+		while (itr.hasNext()) {
+			count++;
+			writeTextToFile(itr.next(), count, filename);
 		}
 	}
 
+	/**
+	 * @param command
+	 * @return
+	 */
+	private static String replacingAdd(String command) {
+		String text = command.replace("add ", "");
+		return text;
+	}
+
+	/**
+	 * @param command
+	 * @return
+	 */
+	private static String replacingDelete(String command) {
+		String text = command.replace("delete ", "");
+		return text;
+	}
+
+	/**
+	 * @param args
+	 * @return
+	 */
+	private static String retrieveFileName(String[] args) {
+		String filename = null;
+		// taking in the filename
+		if (args.length > 0) {
+			filename = args[0];
+		}
+		return filename;
+	}
+
+	/**
+	 * @param count
+	 *            the count to set
+	 */
+	public static void setCount(int count) {
+		TextBuddy.count = count;
+	}
+
+	/**
+	 * 
+	 * @param text
+	 * @param index
+	 * @param filename
+	 */
 	public static void writeTextToFile(String text, int index, String filename) {
 		try {
 			File file = new File(filename);
@@ -252,39 +326,8 @@ public class TextBuddy {
 			bw.write(index + ". " + text + "\n");
 			bw.close();
 
-		}
-
-		catch (IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-		}
-	}
-
-	private static void removeSelectedLine(String lineNum, Vector<String> list,
-			String filename) throws FileNotFoundException {
-		Integer position;
-		try {
-			position = Integer.parseInt(lineNum);
-		} catch (NumberFormatException e) {
-			System.out.println("Delete takes a number argument.");
-			return;
-		}
-		// if the number to delete is out of the list
-		if (position > list.size() || position <= 0) {
-			System.out.println("Invalid deletion");
-			return;
-		}
-
-		System.out.println("deleted from " + filename + ": \""
-				+ list.get(position - 1) + "\"");
-
-		// rewriting files
-		list.removeElementAt(position - 1);
-		clearFile(filename);
-		Iterator<String> itr = list.iterator();
-		int count = 0;
-		while (itr.hasNext()) {
-			count++;
-			writeTextToFile(itr.next(), count, filename);
 		}
 	}
 }
