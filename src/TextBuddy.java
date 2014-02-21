@@ -23,9 +23,29 @@ public class TextBuddy {
 			COMMAND = "command: ",
 			ADD = "add",
 			DISPLAY = "display",
-			CLEAR = "clear", DELETE = "delete", EXIT = "exit", SORT = "sort";
+			CLEAR = "clear",
+			DELETE = "delete",
+			EXIT = "exit",
+			SORT = "sort",
+			SEARCH = "search";
 	private static Vector<String> list = new Vector<String>();
 	private static Scanner sc = new Scanner(System.in);
+
+	/**
+	 * @param flag
+	 * @param keyword
+	 * @return
+	 */
+	private static boolean checkListWithKeyword(boolean hasWord, String keyword) {
+		for (int i = 0; i < list.size(); i++) {
+			int index = i + 1;
+			if (list.get(i).contains(keyword)) {
+				System.out.println(index + ". " + list.get(i));
+				hasWord = true;
+			}
+		}
+		return hasWord;
+	}
 
 	/**
 	 * @param filename
@@ -36,7 +56,7 @@ public class TextBuddy {
 			throws FileNotFoundException {
 
 		if (command.startsWith(ADD)) {
-			String text = replacingAdd(command);
+			String text = replacing(command, ADD);
 			list.add(text);
 			writeTextToFile(text, list.size(), filename);
 			printSuccessfulAddMsg(filename, text);
@@ -44,6 +64,17 @@ public class TextBuddy {
 		if (command.startsWith(SORT)) {
 			sortLines();
 		}
+
+		if (command.startsWith(SEARCH)) {
+			boolean hasWord = false;
+			String keyword = replacing(command, SEARCH);
+			// print the strings that contain the keyword
+			hasWord = checkListWithKeyword(hasWord, keyword);
+			if (!hasWord) {
+				System.out.println("No such word in the file.");
+			}
+		}
+
 		if (command.startsWith(DISPLAY)) {
 			printContentsOfFile(filename);
 		}
@@ -55,7 +86,7 @@ public class TextBuddy {
 		}
 
 		if (command.startsWith(DELETE)) {
-			String lineNum = replacingDelete(command);
+			String lineNum = replacing(command, DELETE);
 			int position = convertStringToInteger(lineNum);
 			removeSelectedLine(position, list, filename);
 		}
@@ -261,17 +292,8 @@ public class TextBuddy {
 	 * @param command
 	 * @return
 	 */
-	private static String replacingAdd(String command) {
-		String text = command.replace("add ", "");
-		return text;
-	}
-
-	/**
-	 * @param command
-	 * @return
-	 */
-	private static String replacingDelete(String command) {
-		String text = command.replace("delete ", "");
+	private static String replacing(String command, String action) {
+		String text = command.replace(action + " ", "");
 		return text;
 	}
 
@@ -321,7 +343,8 @@ public class TextBuddy {
 	private static void sortLines() {
 		Collections.sort(list);
 		for (int i = 0; i < list.size(); i++) {
-			System.out.println(i + 1 + ". " + list.get(i));
+			int index = i + 1;
+			System.out.println(index + ". " + list.get(i));
 		}
 	}
 
