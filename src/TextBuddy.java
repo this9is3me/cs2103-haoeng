@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Vector;
@@ -22,27 +23,16 @@ public class TextBuddy {
 			COMMAND = "command: ",
 			ADD = "add",
 			DISPLAY = "display",
-			CLEAR = "clear", DELETE = "delete", EXIT = "exit";
+			CLEAR = "clear", DELETE = "delete", EXIT = "exit", SORT = "sort";
 	private static Vector<String> list = new Vector<String>();
 	private static Scanner sc = new Scanner(System.in);
-
-	/**
-	 * @param args
-	 * @throws IOException
-	 */
-	public static void main(String[] args) throws Exception {
-		String filename = retrieveFileName(args);
-		copyOldfileToList(filename, list);
-		printMsg(filename);
-		commandHandler(filename);
-	}
 
 	/**
 	 * @param filename
 	 * @param command
 	 * @throws FileNotFoundException
 	 */
-	private static void checkWordAssignAction(String filename, String command)
+	static void checkWordAssignAction(String filename, String command)
 			throws FileNotFoundException {
 
 		if (command.startsWith(ADD)) {
@@ -51,7 +41,9 @@ public class TextBuddy {
 			writeTextToFile(text, list.size(), filename);
 			printSuccessfulAddMsg(filename, text);
 		}
-
+		if (command.startsWith(SORT)) {
+			sortLines();
+		}
 		if (command.startsWith(DISPLAY)) {
 			printContentsOfFile(filename);
 		}
@@ -75,24 +67,6 @@ public class TextBuddy {
 		if (command.startsWith(EXIT)) {
 			closeFile();
 		}
-	}
-
-	/**
-	 * 
-	 * @param lineNum
-	 * @return
-	 * @throws NumberFormatException
-	 */
-	private static int convertStringToInteger(String lineNum)
-			throws NumberFormatException {
-		int position = -1;
-		try {
-			position = Integer.parseInt(lineNum);
-
-		} catch (NumberFormatException e) {
-			System.out.println("'Delete' takes a number argument.");
-		}
-		return position;
 	}
 
 	/**
@@ -132,6 +106,24 @@ public class TextBuddy {
 	}
 
 	/**
+	 * 
+	 * @param lineNum
+	 * @return
+	 * @throws NumberFormatException
+	 */
+	private static int convertStringToInteger(String lineNum)
+			throws NumberFormatException {
+		int position = -1;
+		try {
+			position = Integer.parseInt(lineNum);
+
+		} catch (NumberFormatException e) {
+			System.out.println("'Delete' takes a number argument.");
+		}
+		return position;
+	}
+
+	/**
 	 * @param filename
 	 * @param list
 	 * @throws FileNotFoundException
@@ -142,7 +134,7 @@ public class TextBuddy {
 		File file = new File(filename);
 		// if the file contains previous content
 		if (file.length() != 0) {
-			// copy file to the vector
+			// copy file to the List
 			String line = null;
 			// FileReader reads text files in the default encoding.
 			FileReader fileReader = new FileReader(file);
@@ -164,6 +156,17 @@ public class TextBuddy {
 	 */
 	public static int getCount() {
 		return count;
+	}
+
+	/**
+	 * @param args
+	 * @throws IOException
+	 */
+	public static void main(String[] args) throws Exception {
+		String filename = retrieveFileName(args);
+		copyOldfileToList(filename, list);
+		printMsg(filename);
+		commandHandler(filename);
 	}
 
 	private static void printCommandLine() {
@@ -255,25 +258,6 @@ public class TextBuddy {
 	}
 
 	/**
-	 * @param position
-	 * @param list
-	 * @param filename
-	 * @throws FileNotFoundException
-	 */
-	private static void rewriteFile(int position, Vector<String> list,
-			String filename) throws FileNotFoundException {
-
-		list.removeElementAt(position - 1);
-		clearFile(filename);
-		Iterator<String> itr = list.iterator();
-		int count = 0;
-		while (itr.hasNext()) {
-			count++;
-			writeTextToFile(itr.next(), count, filename);
-		}
-	}
-
-	/**
 	 * @param command
 	 * @return
 	 */
@@ -305,11 +289,40 @@ public class TextBuddy {
 	}
 
 	/**
+	 * @param position
+	 * @param list
+	 * @param filename
+	 * @throws FileNotFoundException
+	 */
+	private static void rewriteFile(int position, Vector<String> list,
+			String filename) throws FileNotFoundException {
+
+		list.removeElementAt(position - 1);
+		clearFile(filename);
+		Iterator<String> itr = list.iterator();
+		int count = 0;
+		while (itr.hasNext()) {
+			count++;
+			writeTextToFile(itr.next(), count, filename);
+		}
+	}
+
+	/**
 	 * @param count
 	 *            the count to set
 	 */
 	public static void setCount(int count) {
 		TextBuddy.count = count;
+	}
+
+	/**
+	 * sorting in alphabetical order and display immediately
+	 */
+	private static void sortLines() {
+		Collections.sort(list);
+		for (int i = 0; i < list.size(); i++) {
+			System.out.println(i + 1 + ". " + list.get(i));
+		}
 	}
 
 	/**
