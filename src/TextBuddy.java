@@ -26,9 +26,10 @@ public class TextBuddy {
 			CLEAR = "clear",
 			DELETE = "delete",
 			EXIT = "exit",
-			SORT = "sort",
-			SEARCH = "search";
-	private static Vector<String> list = new Vector<String>();
+			NOTFOUND = "No such word in the file.";
+	protected static String SORT = "sort";
+	protected static String SEARCH = "search";
+	protected static Vector<String> list = new Vector<String>();
 	private static Scanner sc = new Scanner(System.in);
 
 	/**
@@ -71,7 +72,7 @@ public class TextBuddy {
 			// print the strings that contain the keyword
 			hasWord = checkListWithKeyword(hasWord, keyword);
 			if (!hasWord) {
-				System.out.println("No such word in the file.");
+				System.out.println(NOTFOUND);
 			}
 		}
 
