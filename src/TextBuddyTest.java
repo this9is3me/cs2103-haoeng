@@ -28,11 +28,11 @@ public class TextBuddyTest {
 		assertEquals("search", TextBuddy.SEARCH);
 		assertNotSame("SEARCH", TextBuddy.SEARCH);
 
-		ByteArrayOutputStream sink = new ByteArrayOutputStream();
-		System.setOut(new PrintStream(sink, true));
+		ByteArrayOutputStream text = new ByteArrayOutputStream();
+		System.setOut(new PrintStream(text, true));
 		TextBuddy.checkWordAssignAction(filename, "search xxx");
 		assertNotSame("No such word in the file.",
-				new String(sink.toByteArray()));
+				new String(text.toByteArray()));
 	}
 
 	@Test
